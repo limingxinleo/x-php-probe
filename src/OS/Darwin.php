@@ -33,18 +33,8 @@ class Darwin extends CPU implements OSInterface
         return new CPUModel($core, $processor, $cores, $model);
     }
 
-    public function svr_darwin()
+    protected function initUptime(): string
     {
-        // 获取CPU信息
-        if (false === ($res['cpu']['core'] = Command::get("machdep.cpu.core_count"))) return false;
-
-        $res['cpu']['processor'] = Command::get("machdep.cpu.thread_count");
-        $res['cpu']['cores'] = $res['cpu']['core'] . '核' . (($res['cpu']['processor']) ? '/' . $res['cpu']['processor'] . '线程' : '');
-        $model = Command::get("machdep.cpu.brand_string");
-        $cache = Command::get("machdep.cpu.cache.size") * $res['cpu']['core'];
-        $cache = Size::format($cache * 1024, 0);
-        $res['cpu']['model'] = $model . ' [二级缓存：' . $cache . ']';
-
         // 获取服务器运行时间
         $uptime = Command::get("kern.boottime");
         preg_match_all('#(?<={)\s?sec\s?=\s?+\d+#', $uptime, $matches);
@@ -56,9 +46,15 @@ class Darwin extends CPU implements OSInterface
         $days = floor($hours / 24);
         $hours = floor($hours - ($days * 24));
         $min = floor($min - ($days * 60 * 24) - ($hours * 60));
-        if ($days !== 0) $res['uptime'] = $days . "天";
-        if ($hours !== 0) $res['uptime'] .= $hours . "小时";
-        $res['uptime'] .= $min . "分钟";
+        if ($days !== 0) $uptime = $days . "天";
+        if ($hours !== 0) $uptime .= $hours . "小时";
+        $uptime .= $min . "分钟";
+        return $uptime;
+    }
+
+    public function svr_darwin()
+    {
+
 
         // 获取内存信息
         if (false === ($mTatol = Command::get("hw.memsize"))) return false;

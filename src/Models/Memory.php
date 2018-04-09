@@ -1,31 +1,26 @@
 <?php
 // +----------------------------------------------------------------------
-// | CPU.php [ WE CAN DO IT JUST THINK IT ]
+// | Memory.php [ WE CAN DO IT JUST THINK IT ]
 // +----------------------------------------------------------------------
 // | Copyright (c) 2016-2017 limingxinleo All rights reserved.
 // +----------------------------------------------------------------------
 // | Author: limx <715557344@qq.com> <https://github.com/limingxinleo>
 // +----------------------------------------------------------------------
-namespace Xin\Probe\OS;
+namespace Xin\Probe\Models;
 
-use Xin\Probe\Models\CPU as CPUModel;
-
-abstract class CPU
+class Memory extends Model
 {
-    /** @var CPUModel */
-    public $cpu;
+    public $total;
 
-    public $uptime;
+    public $free;
 
-    public $memory;
+    public $buffers;
 
-    public function __construct()
-    {
-        $this->cpu = $this->initCPU();
-        $this->uptime = $this->initUptime();
-    }
+    public $cached;
 
-    abstract protected function initCPU(): CPUModel;
+    public $used;
 
-    abstract protected function initUptime(): string;
+    public $percent;
+
+    public $cachedPercent;
 }
