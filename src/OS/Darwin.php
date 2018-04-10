@@ -8,8 +8,10 @@
 // +----------------------------------------------------------------------
 namespace Xin\Probe\OS;
 
-use Xin\Probe\Exceptions\CpuCoreException;
+use Xin\Probe\Exceptions\CpuException;
+use Xin\Probe\Exceptions\MemoryException;
 use Xin\Probe\Models\CPU as CPUModel;
+use Xin\Probe\Models\Memory;
 use Xin\Probe\Utils\Command;
 use Xin\Probe\Utils\Size;
 use Xin\Traits\Common\InstanceTrait;
@@ -22,7 +24,7 @@ class Darwin extends CPU implements OSInterface
     {
         $core = Command::get("machdep.cpu.core_count");
         if (false === $core) {
-            throw new CpuCoreException('无法正确获取CPU核数');
+            throw new CpuException('无法正确获取CPU核数');
         }
         $processor = Command::get("machdep.cpu.thread_count");
         $cores = $core . '核' . ($core ? '/' . $processor . '线程' : '');
@@ -52,12 +54,13 @@ class Darwin extends CPU implements OSInterface
         return $uptime;
     }
 
-    public function svr_darwin()
+    protected function initMemory(): Memory
     {
+        $mTatol = Command::get("hw.memsize");
+        if ($mTatol === false) {
+            throw new MemoryException('无法正确获取内存信息');
+        }
 
-
-        // 获取内存信息
-        if (false === ($mTatol = Command::get("hw.memsize"))) return false;
         $vmstat = Command::get("", 'vm_stat', '');
         if (preg_match('/^Pages free:\s+(\S+)/m', $vmstat, $mfree)) {
             if (preg_match('/^File-backed pages:\s+(\S+)/m', $vmstat, $mcache)) {
@@ -80,16 +83,22 @@ class Darwin extends CPU implements OSInterface
         } else {
             return false;
         }
+
         $mUsed = $mTatol - $mFree;
 
-        $res['mTotal'] = Size::format($mTatol, 1);
-        $res['mFree'] = Size::format($mFree, 1);
-        $res['mBuffers'] = Size::format($mBuffer, 1);
-        $res['mCached'] = Size::format($mCached, 1);
-        $res['mUsed'] = Size::format($mUsed, 1);
-        $res['mPercent'] = (floatval($mTatol) != 0) ? round($mUsed / $mTatol * 100, 1) : 0;
-        $res['mCachedPercent'] = (floatval($mCached) != 0) ? round($mCached / $mTatol * 100, 1) : 0; //Cached内存使用率
+        $total = Size::format($mTatol, 1);
+        $free = Size::format($mFree, 1);
+        $buffers = Size::format($mBuffer, 1);
+        $cached = Size::format($mCached, 1);
+        $used = Size::format($mUsed, 1);
+        $percent = (floatval($mTatol) != 0) ? round($mUsed / $mTatol * 100, 1) : 0;
+        $cachedPercent = (floatval($mCached) != 0) ? round($mCached / $mTatol * 100, 1) : 0; //Cached内存使用率
 
+        return new Memory($total, $free, $buffers, $cached, $used, $percent, $cachedPercent);
+    }
+
+    public function svr_darwin()
+    {
         $swapInfo = Command::get("vm.swapusage");
         $swap1 = preg_split('/M/', $swapInfo);
         $swap2 = preg_split('/=/', $swap1[0]);

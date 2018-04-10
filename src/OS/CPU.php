@@ -9,6 +9,7 @@
 namespace Xin\Probe\OS;
 
 use Xin\Probe\Models\CPU as CPUModel;
+use Xin\Probe\Models\Memory;
 
 abstract class CPU
 {
@@ -23,9 +24,12 @@ abstract class CPU
     {
         $this->cpu = $this->initCPU();
         $this->uptime = $this->initUptime();
+        $this->memory = $this->initMemory();
     }
 
     abstract protected function initCPU(): CPUModel;
 
     abstract protected function initUptime(): string;
+
+    abstract protected function initMemory(): Memory;
 }

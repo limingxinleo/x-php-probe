@@ -10,7 +10,7 @@ namespace Xin\Probe\Exceptions;
 
 use Exception;
 
-class CpuCoreException extends Exception implements ExceptionInterface
+class CpuException extends Exception implements ExceptionInterface
 {
 
 }

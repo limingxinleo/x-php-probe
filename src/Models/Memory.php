@@ -23,4 +23,25 @@ class Memory extends Model
     public $percent;
 
     public $cachedPercent;
+
+    /**
+     * Memory constructor.
+     * @param $total
+     * @param $free
+     * @param $buffers
+     * @param $cached
+     * @param $used
+     * @param $percent
+     * @param $cachedPercent
+     */
+    public function __construct($total, $free, $buffers, $cached, $used, $percent, $cachedPercent)
+    {
+        $this->total = $total;
+        $this->free = $free;
+        $this->buffers = $buffers;
+        $this->cached = $cached;
+        $this->used = $used;
+        $this->percent = $percent;
+        $this->cachedPercent = $cachedPercent;
+    }
 }

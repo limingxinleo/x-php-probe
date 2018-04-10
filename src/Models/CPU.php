@@ -18,6 +18,13 @@ class CPU extends Model
 
     public $model;
 
+    /**
+     * CPU constructor.
+     * @param $core
+     * @param $processor
+     * @param $cores
+     * @param $model
+     */
     public function __construct($core, $processor, $cores, $model)
     {
         $this->core = $core;
